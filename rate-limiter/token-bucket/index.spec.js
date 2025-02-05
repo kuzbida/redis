@@ -1,27 +1,32 @@
-const { FixedWindowRateLimiter } = require('./index');
+const { afterEach } = require('node:test');
+const { TokenBucketRateLimiter } = require('./index');
 
-describe('Fixed Windon Rate Limiter', () => {
+describe('Token Bucket Rate Limiter', () => {
     let rateLimiter;
     const clientId = 'client1';
 
     beforeAll(() => {
-        rateLimiter = new FixedWindowRateLimiter(5, 3);
+        rateLimiter = new TokenBucketRateLimiter(5, 1);
+    });
+
+    afterEach(async () => {
+        await rateLimiter.redisClient.del(['rate_limit:client1:count', 'rate_limit:client1:refill']);
     });
 
     afterAll(async () => {
         await rateLimiter.redisClient.quit();
     })
 
-    it('should allow 3 consequitive requests', async () => {
-        for (let i of [1,2,3]) {
+    it('should allow 5 consequitive requests', async () => {
+        for (let i of [1,2,3,4,5]) {
             expect(await rateLimiter.isAllowed(clientId)).toBe(true);
         }
     });
 
 
-    it('should dissalow 4 consequitive requests', async () => {
+    it('should dissalow 6th consequitive request', async () => {
         let isAllowed;
-        for (let i of [1,2,3,4]) {
+        for (let i of [1,2,3,4,5,6]) {
             isAllowed = await rateLimiter.isAllowed(clientId);
         }
         expect(isAllowed).toBe(false);
@@ -31,8 +36,8 @@ describe('Fixed Windon Rate Limiter', () => {
         const clientId = 'client2';
     
         // Make some requests
-        for (let i of [1,2,3]) {
-            await rateLimiter.isAllowed(clientId);
+        for (let i of [1,2,3,4,5]) {
+            expect(await rateLimiter.isAllowed(clientId)).toBe(true);
         }
     
         // Wait for 3 seconds to let the key expire
