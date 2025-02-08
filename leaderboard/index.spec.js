@@ -15,7 +15,7 @@ describe('LeaderBoard', () => {
 
     afterAll(async () => {
         await leaderBoard.redisClient.quit();
-    })
+    });
 
     it('should add new Player', async () => {
         expect(await leaderBoard.setUserScore('player1', 10)).toEqual(1);
