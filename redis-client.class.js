@@ -22,6 +22,10 @@ class RedisClient {
         return this.checkConnection();
     }
 
+    async disconnect() {
+        await this.redisClient.quit();
+    }
+
     async checkConnection() {
         return new Promise(async (resolve, reject) => {
             if (this.#redisReady || this.redisClient.isReady) {

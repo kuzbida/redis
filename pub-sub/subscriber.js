@@ -1,4 +1,4 @@
-const { RedisClient } = require('./redis-client.class');
+const { RedisClient } = require('../redis-client.class');
 
 class Subscriber extends RedisClient {
     channels = [];
